@@ -1,0 +1,153 @@
+import React, { useEffect, useRef, useState } from "react";
+
+
+const paragraphs = [
+  `Inception explores the concept of dreams within dreams, featuring a complex narrative and stunning visuals.`,
+  `The Godfather is a cinematic masterpiece that portrays the rise of a powerful mafia family with gripping performances.`,
+  `Interstellar combines space exploration with deep emotional themes and groundbreaking visual effects.`,
+  `The Dark Knight redefined superhero films with its intense storyline and Heath Ledger’s legendary Joker.`,
+  `Forrest Gump tells the heartfelt story of a simple man who unwittingly influences historical events.`
+];
+
+
+const getRandomParagraph = () => {
+  const index = Math.floor(Math.random() * paragraphs.length);
+  return paragraphs[index];
+
+}
+
+function TypingTest() {
+  const [input, setInput] = useState("");
+  const [timer, setTimer] = useState(0);
+  const [started, setStarted] = useState(false);
+  const [wpm, setWpm] = useState(0);
+  const [charStatus, setCharStatus] = useState([]);
+  const [strictMode, setStrictMode] = useState(true);
+  const [accuracy, setAccuracy] = useState(0);
+  const [paragraphText, setParagraphText] = useState(getRandomParagraph());
+
+  const intervalRef = useRef(null);
+  const startTimeRef = useRef(null);
+  const inputRef = useRef(null);
+  const soundCorrectRef = useRef(null);
+  const soundInCorrectRef = useRef(null);
+
+  useEffect(() => {
+    if (started && !intervalRef.current) {
+      startTimeRef.current = new Date();
+      intervalRef.current = setInterval(() => {
+        const elapsed = Math.floor((new Date() - startTimeRef.current) / 1000);
+        setTimer(elapsed);
+      }, 1000);
+    }
+    return () => clearInterval(intervalRef.current);
+  }, [started]);
+
+  const stopTimer = () => {
+    clearInterval(intervalRef.current);
+    intervalRef.current = null;
+  }
+
+  const calculateStats = (correct, totalTyped) => {
+    const elapsedSeconds = Math.max(1, Math.floor((new Date() - startTimeRef.current) / 1000));
+    const minutes = elapsedSeconds / 60;
+    const newWpm = Math.round(correct / 5 / minutes) || 0;
+    const newAccuracy = Math.round((correct / totalTyped) * 100) || 0;
+    setWpm(newWpm);
+    setAccuracy(newAccuracy);
+  };
+
+  const handleInput = (e) => {
+    const value = e.target.value;
+    setInput(value);
+    if (!started) setStarted(true);
+    
+    let newStatus = [];
+    let correct = 0;
+
+    for (let i = 0; i < value.length; i++) {
+      if (value[i] === paragraphText[i]) {
+      if(charStatus[i] !== "correct") soundCorrectRef.current?.play();
+      correct++;
+      newStatus.push("correct");
+    } else {
+       if(charStatus[i] !== "incorrect") soundInCorrectRef.current?.play();
+      newStatus.push("incorrect");
+    }
+  }
+  setCharStatus(newStatus);
+  
+  if (value.length >= paragraphText.length) {
+    stopTimer();
+    calculateStats(correct, value.length);
+    inputRef.current.disabled = true;
+  }
+};
+
+  const handleKeyDown = (e) => {
+    if(
+      strictMode &&
+      (e.key === "Backspace" || e.key === "Delete") && charStatus[charStatus.length - 1] === "incorrect"
+    ){
+      e.preventDefault();
+    }
+  };
+
+  const restart = async () => {
+    const newPara = getRandomParagraph();
+    setParagraphText(newPara);
+    setInput('');
+    setTimer(0);
+    setWpm(0);
+    setAccuracy(0);
+    setStarted(false);
+    stopTimer();
+    inputRef.current.disabled = false;
+    inputRef.current.focus();
+  };
+
+  return (
+    <div className="container">
+      <h1>Typing Speed test</h1>
+      <p id="text-display">
+        {[...paragraphText].map((char, i) => {
+          let className = "";
+          if (input[i] === undefined) className = "";
+          else if (input[i] === char) className = "correct";
+          else className = "incorrect";
+
+          return (
+            <span key={i} className={className}>
+              {char}
+            </span>
+          );
+        })}
+      </p>
+      <textarea
+        id="input-area"
+        value={input}
+        onChange={handleInput}
+        onKeyDown={handleKeyDown}
+        ref={inputRef}
+        placeholder="Start typing..."
+      ></textarea>
+      <div id="stats">
+        <p>
+          Time: <span id="timer">{timer}</span>s
+        </p>
+        <p>
+          Speed: <span id="wpm">{wpm}</span>WPM
+        </p>
+        <p>
+          Accuracy: <span id="accuracy">{accuracy}</span>%
+        </p>
+      </div>
+      <button id="restart" onClick={restart}>Restart</button>
+      <button id="mode" className={strictMode ? 'red-mode' : 'green-mode'}  onClick={() => setStrictMode(!strictMode)}>{strictMode ? "Disable Strict Mode" : "Enable Strict Mode"}</button>
+      <audio id="sound-correct" ref={soundCorrectRef} src="/sounds/correct.mp3" preload="auto"></audio>
+      <audio id="sound-incorrect" ref={soundInCorrectRef} src="/sounds/incorrect.mp3" preload="auto"></audio>
+    </div>
+  );
+  }
+
+export default TypingTest;
