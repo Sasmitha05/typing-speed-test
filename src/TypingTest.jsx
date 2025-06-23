@@ -2,11 +2,11 @@ import React, { useEffect, useRef, useState } from "react";
 
 
 const paragraphs = [
-  `Inception explores the concept of dreams within dreams, featuring a complex narrative and stunning visuals.`,
-  `The Godfather is a cinematic masterpiece that portrays the rise of a powerful mafia family with gripping performances.`,
-  `Interstellar combines space exploration with deep emotional themes and groundbreaking visual effects.`,
-  `The Dark Knight redefined superhero films with its intense storyline and Heath Ledger’s legendary Joker.`,
-  `Forrest Gump tells the heartfelt story of a simple man who unwittingly influences historical events.`
+  `Once upon a time, a little rabbit named Ruby loved to hop through the green forest and chase butterflies.`,
+  `In a quiet village, a boy found a magic pencil that brought all his drawings to life, including a dancing dinosaur.`,
+  `Ellie the elephant wanted to fly, so her jungle friends tied balloons to her back and she soared through the clouds.`,
+  `Luna the cat discovered a hidden door in her backyard that led to a secret land made entirely of candy and chocolate.`,
+  `A tiny turtle named Timmy decided to race a fast rabbit, and with patience and determination, he won the race.`
 ];
 
 
