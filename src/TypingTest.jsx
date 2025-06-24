@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 
-
 const paragraphs = [
   `Once upon a time, a little rabbit named Ruby loved to hop through the green forest and chase butterflies.`,
   `In a quiet village, a boy found a magic pencil that brought all his drawings to life, including a dancing dinosaur.`,
@@ -9,11 +8,9 @@ const paragraphs = [
   `A tiny turtle named Timmy decided to race a fast rabbit, and with patience and determination, he won the race.`
 ];
 
-
 const getRandomParagraph = () => {
   const index = Math.floor(Math.random() * paragraphs.length);
   return paragraphs[index];
-
 }
 
 function TypingTest() {
@@ -29,8 +26,6 @@ function TypingTest() {
   const intervalRef = useRef(null);
   const startTimeRef = useRef(null);
   const inputRef = useRef(null);
-  const soundCorrectRef = useRef(null);
-  const soundInCorrectRef = useRef(null);
 
   useEffect(() => {
     if (started && !intervalRef.current) {
@@ -61,39 +56,39 @@ function TypingTest() {
     const value = e.target.value;
     setInput(value);
     if (!started) setStarted(true);
-    
+
     let newStatus = [];
     let correct = 0;
 
     for (let i = 0; i < value.length; i++) {
       if (value[i] === paragraphText[i]) {
-      if(charStatus[i] !== "correct") soundCorrectRef.current?.play();
-      correct++;
-      newStatus.push("correct");
-    } else {
-       if(charStatus[i] !== "incorrect") soundInCorrectRef.current?.play();
-      newStatus.push("incorrect");
+        correct++;
+        newStatus.push("correct");
+      } else {
+        newStatus.push("incorrect");
+      }
     }
-  }
-  setCharStatus(newStatus);
-  
-  if (value.length >= paragraphText.length) {
-    stopTimer();
-    calculateStats(correct, value.length);
-    inputRef.current.disabled = true;
-  }
-};
+
+    setCharStatus(newStatus);
+
+    if (value.length >= paragraphText.length) {
+      stopTimer();
+      calculateStats(correct, value.length);
+      inputRef.current.disabled = true;
+    }
+  };
 
   const handleKeyDown = (e) => {
-    if(
+    if (
       strictMode &&
-      (e.key === "Backspace" || e.key === "Delete") && charStatus[charStatus.length - 1] === "incorrect"
-    ){
+      (e.key === "Backspace" || e.key === "Delete") &&
+      charStatus[charStatus.length - 1] === "incorrect"
+    ) {
       e.preventDefault();
     }
   };
 
-  const restart = async () => {
+  const restart = () => {
     const newPara = getRandomParagraph();
     setParagraphText(newPara);
     setInput('');
@@ -102,13 +97,14 @@ function TypingTest() {
     setAccuracy(0);
     setStarted(false);
     stopTimer();
+    setCharStatus([]);
     inputRef.current.disabled = false;
     inputRef.current.focus();
   };
 
   return (
     <div className="container">
-      <h1>Typing Speed test</h1>
+      <h1>Typing Speed Test</h1>
       <p id="text-display">
         {[...paragraphText].map((char, i) => {
           let className = "";
@@ -132,22 +128,20 @@ function TypingTest() {
         placeholder="Start typing..."
       ></textarea>
       <div id="stats">
-        <p>
-          Time: <span id="timer">{timer}</span>s
-        </p>
-        <p>
-          Speed: <span id="wpm">{wpm}</span>WPM
-        </p>
-        <p>
-          Accuracy: <span id="accuracy">{accuracy}</span>%
-        </p>
+        <p>Time: <span id="timer">{timer}</span>s</p>
+        <p>Speed: <span id="wpm">{wpm}</span> WPM</p>
+        <p>Accuracy: <span id="accuracy">{accuracy}</span>%</p>
       </div>
       <button id="restart" onClick={restart}>Restart</button>
-      <button id="mode" className={strictMode ? 'red-mode' : 'green-mode'}  onClick={() => setStrictMode(!strictMode)}>{strictMode ? "Disable Strict Mode" : "Enable Strict Mode"}</button>
-      <audio id="sound-correct" ref={soundCorrectRef} src="/sounds/correct.mp3" preload="auto"></audio>
-      <audio id="sound-incorrect" ref={soundInCorrectRef} src="/sounds/incorrect.mp3" preload="auto"></audio>
+      <button
+        id="mode"
+        className={strictMode ? 'red-mode' : 'green-mode'}
+        onClick={() => setStrictMode(!strictMode)}
+      >
+        {strictMode ? "Disable Strict Mode" : "Enable Strict Mode"}
+      </button>
     </div>
   );
-  }
+}
 
 export default TypingTest;
